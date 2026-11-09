@@ -1,0 +1,504 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Зүрхний зам</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: one narrow column, a sticky "path" header (balance bar + 3 meters), one situation card at a time, results shown last. */
+:root{
+  --bg:#eef2f0; --surface:#fbfcfb; --ink:#16231f; --mute:#566761; --line:#d2dcd7;
+  --fruit:#1c7556; --fruit-soft:#dcefe6; --flesh:#b4472f; --flesh-soft:#f6e0d9;
+  --gold:#8c6410; --gold-soft:#f2e7c6; --focus:#2b5fc4; --shade:rgba(22,35,31,.06);
+  --serif:"Source Serif 4","Noto Serif",Georgia,"Times New Roman",serif;
+  --sans:"Golos Text","Noto Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1614; --surface:#162220; --ink:#e6eeea; --mute:#9db0a9; --line:#293a36;
+  --fruit:#4fc79b; --fruit-soft:#163a2e; --flesh:#f08a6d; --flesh-soft:#3b211a;
+  --gold:#e3bb55; --gold-soft:#372e14; --focus:#8db4ff; --shade:rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1614; --surface:#162220; --ink:#e6eeea; --mute:#9db0a9; --line:#293a36;
+  --fruit:#4fc79b; --fruit-soft:#163a2e; --flesh:#f08a6d; --flesh-soft:#3b211a;
+  --gold:#e3bb55; --gold-soft:#372e14; --focus:#8db4ff; --shade:rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;padding-inline:16px}
+.wrap{max-width:760px;margin-inline:auto;padding-block:14px 56px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--serif);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(2rem,6vw,2.8rem);font-weight:700}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0}
+.mute{color:var(--mute)}
+.small{font-size:.86rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tag{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--mute)}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.btn{background:var(--ink);color:var(--bg);border:0;border-radius:10px;padding:12px 20px;font-weight:600}
+.btn:hover{opacity:.9}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.fruit{background:var(--fruit);color:#fff}
+.btn.flesh{background:var(--flesh);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.fruit,:root:not([data-theme="light"]) .btn.flesh{color:#0e1614}}
+:root[data-theme="dark"] .btn.fruit,:root[data-theme="dark"] .btn.flesh{color:#0e1614}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sp{justify-content:space-between}
+
+/* path header */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px 6px;margin-inline:-16px;padding-inline:16px;border-bottom:1px solid var(--line)}
+.hdr-in{max-width:760px;margin-inline:auto;display:flex;flex-direction:column;gap:8px}
+.brand{font-family:var(--serif);font-weight:700;font-size:1.05rem}
+.bal{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,var(--flesh),var(--line) 50%,var(--fruit))}
+.bal i{position:absolute;top:-5px;width:20px;height:20px;border-radius:50%;background:var(--surface);border:3px solid var(--ink);transform:translateX(-50%);transition:left .6s ease}
+.bal-l{display:flex;justify-content:space-between;font-size:.72rem;color:var(--mute)}
+.meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.m{display:flex;flex-direction:column;gap:3px;font-size:.78rem}
+.m b{display:flex;justify-content:space-between;font-weight:500}
+.m .t{height:6px;background:var(--line);border-radius:4px;overflow:hidden}
+.m .t i{display:block;height:100%;background:var(--gold);transition:width .6s ease}
+.tog{font-size:.8rem;border:1px solid var(--line);background:transparent;border-radius:20px;padding:4px 12px}
+.tog[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+
+/* scene */
+.story{font-family:var(--serif);font-size:1.18rem;line-height:1.6}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:14px}
+.opt:hover{border-color:var(--mute)}
+.opt[aria-pressed="true"]{border-color:var(--ink);background:var(--shade)}
+.opt .l{width:28px;height:28px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font-weight:600;font-size:.85rem}
+.opt[aria-pressed="true"] .l{background:var(--ink);color:var(--bg)}
+.opt .g{display:block;margin-top:6px;font-size:.84rem;color:var(--mute)}
+.opt .g b{font-weight:600;color:var(--gold)}
+.field{display:flex;flex-direction:column;gap:6px}
+label,legend{font-weight:600;font-size:.95rem}
+textarea{font:inherit;width:100%;min-height:96px;resize:vertical;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.radio{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:.93rem}
+.radio input{margin-top:4px;accent-color:var(--ink)}
+.need{font-size:.82rem;color:var(--mute)}
+
+/* result */
+.verdict{border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:4px}
+.verdict.fruit{background:var(--fruit-soft);border:1px solid var(--fruit)}
+.verdict.flesh{background:var(--flesh-soft);border:1px solid var(--flesh)}
+.verdict .tag{color:inherit}
+.verdict.fruit .tag,.verdict.fruit .big{color:var(--fruit)}
+.verdict.flesh .tag,.verdict.flesh .big{color:var(--flesh)}
+.big{font-family:var(--serif);font-size:1.5rem;font-weight:700}
+.quote{border-left:3px solid var(--line);padding:2px 0 2px 12px;font-size:.95rem}
+.quote .tag{display:block;margin-bottom:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:20px;padding:3px 12px;font-size:.84rem;font-variant-numeric:tabular-nums}
+.chip.up{border-color:var(--fruit);color:var(--fruit)}
+.chip.dn{border-color:var(--flesh);color:var(--flesh)}
+.pay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pay div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.88rem}
+.pay b{display:block;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.callout{background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;font-size:.93rem}
+.callout .tag{color:var(--gold)}
+.grace{background:var(--fruit-soft);border:1px solid var(--fruit);border-radius:12px;padding:14px;font-size:.95rem}
+details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+summary{cursor:pointer;font-weight:600}
+details ul,details ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.teach{border-left:3px solid var(--gold);padding-left:12px;font-size:.92rem;margin-top:10px}
+
+/* final */
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 28px;gap:10px;align-items:center;font-size:.88rem}
+.bar .t{height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:6px}
+.bar.f .t i{background:var(--fruit)} .bar.x .t i{background:var(--flesh)}
+.bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pcht{display:flex;flex-direction:column;gap:6px}
+.pr{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;font-size:.8rem}
+.pr .bb{display:flex;flex-direction:column;gap:3px}
+.pr .bb i{display:block;height:7px;border-radius:4px}
+.pr .s{background:var(--gold)} .pr .lp{background:var(--fruit)} .pr .ln{background:var(--flesh)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--mute)}
+.legend i{display:inline-block;width:12px;height:7px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.jr{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:.92rem;background:var(--bg)}
+.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 9px;border-radius:12px;margin-right:6px}
+.pill.f{background:var(--fruit-soft);color:var(--fruit)} .pill.x{background:var(--flesh-soft);color:var(--flesh)} .pill.g{background:var(--gold-soft);color:var(--gold)}
+.intro-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mode{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:12px}
+.mode[aria-pressed="true"]{border-color:var(--ink)}
+.mode b{display:block}
+input[type=text]{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+@media (max-width:560px){.cols,.modes,.pay{grid-template-columns:1fr}.bar{grid-template-columns:minmax(0,110px) minmax(0,1fr) 24px}.card{padding:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const FR=["Хайр","Баяр хөөр","Амар тайван","Удаан тэвчихүй","Эелдэг байдал","Сайхан сэтгэл","Итгэл","Номхон байдал","Биеэ захирах"];
+const FL=["Цэвэр бус хүсэл","Өөр зүйлд найдах","Үзэн ядалт / гомдол","Маргаан","Атаархал / харьцуулалт","Хилэгнэл","Талцал","Дураар дургилт","Өөрийгөө зөвтгөх"];
+const MOT=["Зөв гэж үзсэн учраас, Шүтээнд болон хүнд хайр харуулахын тулд","Хүмүүс намайг ингэж харахыг хүссэн учраас","Айдас, дарамт, шийтгэлээс зайлсхийхийн тулд","Өөрийн хүсэл, ашгийн төлөө"];
+const MOTS=["Зөв гэж үзсэн","Хүмүүст харагдах","Айдас","Өөрийн ашиг"];
+const LET="АБВГ";
+
+// choice = [flesh?, trait index, short-term attraction 1-5, text, short-term line, what happens, long-term, verses, [heart, relationships, peace]]
+const S=[
+{id:1,ch:"Матт 5:21–26",title:"Миний санаа",quick:1,
+story:"Бүлгийн ажлаа танилцуулах өдөр. Ангийн нэг хүн чиний долоо хоног бодсон санааг өөрийнхөө нэрээр хэлчихлээ. Бүгд түүнийг алга ташиж байна. Дотор чинь буцалж байна.",
+c:[
+[1,5,5,"Босоод бүх ангийн өмнө “Хулгайч!” гэж хашгирах.","Одоохондоо: уураа гаргаж хөнгөрнө, бүгд чамайг харна.","Танхим нам гүм болов. Чиний хэлсэн үнэн байсан ч өнгө аяс нь үнэнийг дарчихлаа. Хүмүүс асуудлаас илүү чиний хашгираанг санана.","Тэр хүн хамгаалалтад орж, эвлэрэх зам хаагдав. Багш хоёуланг чинь шүүмжиллээ.","Матт 5:21–22; Иаков 1:19–20",[-9,-8,-6]],
+[1,2,4,"Юу ч хэлэлгүй чимээгүй байж, тэр хүнийг дотроо “өнгөрсөн” гэж тооцох.","Одоохондоо: маргаан гарахгүй, аюулгүй санагдана.","Гаднаа тайван харагдсан ч дотор чинь гомдол хатуурч байна. Түүнтэй таарах бүрд хүйтэн болно.","Хэлээгүй гомдол алга болдоггүй, харин нууцаар ургадаг.","Матт 5:23–24; Галат 5:20",[-6,-7,-8]],
+[0,2,2,"Уураа намдтал хүлээж, завсарлагаанаар түүнтэй ганцаараа тайван ярьж, “Энэ санааг хамтдаа багшид тайлбарлая” гэх.","Одоохондоо: хэцүү. Хүлээж, тайван ярих хэрэгтэй.","Эхлээд тэр хүн хамгаалалт хийсэн ч чи өндөр өнгөөр хэлээгүй учир өөрөө уучлалт гуйв. Та хоёр багшид хамт тайлбарласан.","Харилцаа бүтэн үлдэж, ажил чинь хүлээн зөвшөөрөгдөв.","Матт 5:9; Матт 5:23–24; Галат 5:22",[9,8,8]],
+[1,6,4,"Завсарлагаанаар найзууддаа “Тэр ийм л хүн, бүү хамт ажилла” гэж ярьж, талыг татах.","Одоохондоо: хүмүүс чамайг дэмжиж, ганцаараа биш мэт.","Хэд хэдэн хүн чиний талд орсон ч анги хоёр хуваагдав. Түүний тухай хэлсэн зүйл бусдаар дамжиж өөрчлөгдөн буцаж ирлээ.","Асуудал хоёр хүний биш, бүх ангийн асуудал болов.","Галат 5:19–20",[-7,-8,-6]]],
+disc:["Уур ирэхэд хашгирах ба хайрлах хоёрын завсар юу чамайг зогсоож чадах вэ?","Эвлэрэх алхмыг хэзээ хийх вэ? Тэр хүн эхлээд уучлал гуйхыг хүлээх үү?"],
+teach:"Матт 5:23–24-т тахилаас өмнө эвлэрэхийг заасан: харилцааны асуудал залбирлаас хойш хойшлогддоггүй. Сурагчийн тайлбар дахь “тэр буруутай” гэсэн хэллэгт анхаар."},
+
+{id:2,ch:"Матт 5:27–30",title:"Хэн ч мэдэхгүй орой",quick:1,
+story:"Шөнийн нэг цаг. Өрөө чимээгүй. Утсанд зохисгүй зургууд гарч ирлээ. Хэн ч мэдэхгүй. Дотор чинь “нэг л удаа” гэж шивнэнэ.",
+c:[
+[1,0,5,"Үргэлжлүүлэн үзэж, “Би хүн л дээ” гэж өөрийгөө тайвшруулах.","Одоохондоо: сонирхол ханагдана, хэн ч мэдэхгүй.","Нэг цаг хоёр болов. Дараа нь эвгүй, хоосон мэдрэмж үлдэв.","Нууц зуршил бол өөрийгөө хүлэх гинж. Хэн ч мэдэхгүй байдал нь түүнийг улам хүчтэй болгодог.","Матт 5:27–28; 2 Тимот 2:22",[-9,-4,-9]],
+[1,8,4,"“Ганцхан удаа” гэж амлан хагас үзээд, “Энэ хор хөнөөлгүй” гэж зөвтгөх.","Одоохондоо: бага эвгүй, өөрийгөө хамгаалсан мэт.","Зөвтгөх үг бүр урьдаас бэлэн байв. Дараагийн удаа зөвтгөл улам хурдан гарна.","Өөрийгөө хуурах нь үйлдлээс ч гүн зүрхний гэмтэл.","Матт 5:29–30; Сургаал үгс 4:23",[-7,-4,-8]],
+[0,8,2,"Утсаа хаагаад, тэр апп-аа устгаж, шүүлтүүр суулгаж, өрөөнөөс гарч нэг хором тайвширах.","Одоохондоо: тэмцэл хатуу, “ялагдсан” мэт санагдана.","Эхний 10 минут хэцүү байсан ч дараа нь сэтгэл тайвширлаа. Чи хүсэлдээ захирагдсангүй.","Эргэх замаа урьдчилан хаасан нь дараагийн тэмцлийг хөнгөлнө.","Матт 5:29–30; Галат 5:16, 5:23",[9,4,9]],
+[0,7,2,"Утсаа орхиж, маргааш итгэдэг хүндээ (найз, ах, багш) нууц тэмцлээ хэлэхээр шийдэх.","Одоохондоо: ичгэвтэр. Нууцаа нээх айдас байна.","Нууц гэрэлд гарахад хүчээ алдсан. Чи ганцаараа тэмцэж байгаагүйгээ ойлгов.","Нээлттэй байдал нь хамгаалалтын хамгийн бат хэлбэр.","Иаков 5:16; Матт 5:3",[7,7,8]]],
+disc:["“Хэн ч мэдэхгүй” гэдэг бодол яагаад ийм хүчтэй вэ?","Матт 5:29–30-ын “нүдээ ухаж хая” нь практикт юу гэсэн үг вэ (хамгаалалт, нууцаа хуваалцах)?"],
+teach:"Энэ нөхцөлд ичгүүрийг бус хамгаалалт, нээлттэй байдал, тусламжийг онцол. Сурагчдыг гэм буруугаар дарахгүйгээр ярилцах орчин бүрдүүл. Хувийн нууцыг нь шахаж асууж болохгүй."},
+
+{id:3,ch:"Матт 5:33–37",title:"Тийм ба үгүй",
+story:"Багш асууна: “Өчигдрийн даалгавар хэн хийгээгүй вэ?” Чи хийгээгүй. Хажууд чинь найз шивнэв: “Өвдсөн гэж хэл, багш итгэнэ.”",
+c:[
+[1,8,5,"“Өвдсөн байсан” гэж худлаа хэлэх.","Одоохондоо: шийтгэлээс мултарна.","Багш итгэв. Гэхдээ дараагийн өдөр түүний нүд рүү харахад чи юу хэлснээ санаж явах хэрэгтэй болов.","Нэг худал нөгөөг дуудна. Итгэл буурна.","Матт 5:37; Ефес 4:25",[-7,-8,-7]],
+[1,8,4,"Хагас үнэн хэлэх: “Гэртээ асуудал байсан” гэх (гэхдээ шалтгаан нь тэр биш).","Одоохондоо: бага эвгүй, бүрэн худал биш мэт.","Үг нь худал биш мэт сонсогдсон ч утга нь худал байв. Чи үүнийг мэдэж байна.","Хагас үнэн нь хөнгөхөн савтай худал.","Матт 5:37; Сургаал үгс 12:22",[-5,-5,-6]],
+[0,7,2,"Хийгээгүй гэдгээ хүлээн зөвшөөрч, хэзээ дуусгахаа хэлэх.","Одоохондоо: ичгэвтэр, оноо хасагдаж магадгүй.","Багш сануулга өгсөн ч өдрийн сүүлд чамайг үнэнч гэж тэмдэглэв.","Чиний “тийм” бол тийм, “үгүй” бол үгүй гэдэг нэр бий болно.","Матт 5:37; Сургаал үгс 28:13",[8,7,9]]],
+disc:["Үнэн хэлэх нь ашигтай бол хэлэх үү? Ашиггүй бол?","Чиний “тийм” ба “үгүй” хүмүүсийн дунд хэр жинтэй вэ?"],
+teach:"Матт 5:37: тангараг биш, найдвартай үг. Хагас үнэнийг үнэнээс хэрхэн ялгахыг харуул."},
+
+{id:4,ch:"Матт 5:38–42",title:"Нөгөө хацар",quick:1,
+story:"Чамайг байнга шоолдог хүн өнөөдөр бүгдийн өмнө чиний гэр бүлийг доромжиллоо. Бүгд чамайг харж байна.",
+c:[
+[1,3,5,"Илүү хурц үгээр хариулж, ялах.","Одоохондоо: хүмүүс инээж, чи ялсан мэт.","Хоёулаа бие биенээ хазлаа. Хэн нь яг юу хэлснийг хэн ч санахгүй, зөвхөн мөргөлдөөнийг санана.","Хариу хариуг дуудна. Зөрчил урт болно.","Матт 5:38–39; Галат 5:15",[-7,-8,-6]],
+[1,2,4,"Түүний нууцыг олж, нэг өдөр ил болгохоор төлөвлөх.","Одоохондоо: өшөө авах бодол ачаа хөнгөлнө.","Төлөвлөгөө бодох бүрд чи түүнээс чөлөөлөгдсөнгүй, харин түүний тухай илүү бодож байна.","Өшөө дотор амар тайван байдаггүй.","Матт 5:43–44; Ром 12:19",[-8,-7,-8]],
+[0,4,2,"Тайван өнгөөр: “Миний гэр бүлийн тухай ингэж ярихыг хүлээж авахгүй” гэж хил тогтоож, хариу доромжлохгүй.","Одоохондоо: ялсан мэдрэмж байхгүй, хэцүү.","Тэр эхлээд шоолсон ч чи хариу өгөөгүй тул бусад нь түүнд дэмжлэг үзүүлсэнгүй. Харилцааны хил тодорлоо.","Эелдэг байдал сул дорой байдал биш, харин хүч.","Матт 5:39; Сургаал үгс 15:1; Колоссай 4:6",[9,7,7]],
+[0,0,2,"Өдрийн сүүлд түүнийг ганцаараа хүлээж аваад, юу ингэтэл уурлуулдгийг нь асууж, сонсохыг хүсэх.","Одоохондоо: “Яагаад би?” гэсэн мэдрэмж.","Тэр гайхсан нүдтэй, анхны удаа өөрийнхөө хатуу үгийн шалтгааныг хэлэв.","Дайсныг хайрлах нь тэр хүний тухай бодлыг өөрчилдөг.","Матт 5:44; Ром 12:21",[8,9,7]]],
+disc:["“Нөгөө хацар” гэдэг нь хүчирхийллийг тэвчих гэсэн үг үү?","Хил тавих ба өшөө авахын ялгаа юу вэ?"],
+teach:"Матт 5:38–42 нь өшөөний хэлхээг таслахыг заадаг. Дарамт, хүчирхийлэл ноцтой бол насанд хүрсэн хүнд хэлэх нь зөв гэдгийг тодорхой хэл."},
+
+{id:5,ch:"Галат 5:13–15",title:"Бүлгийн чат",quick:1,
+story:"Бүлгийн чатад хоёр найз чинь хурц үгээр маргаж байна. Аль хэдийн 60 мессеж. Хүмүүс талаа сонгож эхэллээ. Чиний бичих товч хүлээж байна.",
+c:[
+[1,6,4,"Нэг талд орж, “Тэр зөв” гэж нэмж бичих.","Одоохондоо: нэг талын дэмжлэг авч, “манай тал” болно.","Таны мессеж хоёр талын галд тос нэмэв. Хоёр найз чинь чамайг талдаа гэж үзэж эхэллээ.","Талцал найзуудыг хоёр хуваана.","Галат 5:15, 5:20",[-7,-8,-6]],
+[1,3,3,"Хоёр талыг шоолсон хошин бичээд маргаан ширүүсэхийг харах.","Одоохондоо: хөгжилтэй, анхаарал татна.","Хүмүүс инээв. Хоёр найз чинь улам гомдов.","Бусдын өвдөлтөөр зугаацах нь итгэлийг устгана.","Галат 5:15; Галат 5:26",[-6,-7,-5]],
+[0,2,2,"Чат дээр богино: “Хоёуланг чинь хүндэлдэг. Одоо хэт халуун байна. Тус тусад нь ярья.” гэж бичээд, тус тусад нь хувиараа холбогдох.","Одоохондоо: “Чи яагаад хөндлөнгөөс?” гэж загнуулж магадгүй.","Чат тайвширав. Хоёр найз чинь хувиараа яриад, маргааш бие биедээ уучлал гуйв.","Эвлэрүүлэгч олны өмнө биш, хувиар ажилладаг.","Матт 5:9; Галат 5:22; Галат 5:13",[9,8,8]]],
+disc:["Онлайн маргаанд чимээгүй байх нь аль үед зөв, аль үед буруу вэ?","Галат 5:15-ийн “бие биенээ идэх” чатад хэрхэн илэрдэг вэ?"],
+teach:"Дижитал орчинд талцал хурдан үүснэ. Эвлэрүүлэгчийн шийдэл олны өмнө биш, хувиар үргэлжилдэг гэдгийг онцол."},
+
+{id:6,ch:"Матт 6:1–4",title:"Нууцаар өгөх",
+story:"Эмнэлэгт хэвтэж буй хөрш ахмад чинь шаардлагатай номоо авч чадахгүй байна. Чи хэмнэсэн мөнгөөрөө түүнд тусалж чадна.",
+c:[
+[1,8,5,"Тусалж, бүх ангидаа “Би ийм сайн” гэж зарлах.","Одоохондоо: магтаал, нэр хүнд.","Хүмүүс магтав. Гэвч дотор нь хоосон. Хариуг нь аль хэдийн авчихсан.","Магтаалд хэрэгцээтэй болж, өгөх нь тоглолт болно.","Матт 6:1–2",[-6,-3,-6]],
+[1,1,4,"Мөнгөө өөртөө хадгалж, “Миний үүрэг биш” гэж өнгөрөх.","Одоохондоо: мөнгө хэвээр.","Мөнгө хэвээр байлаа. Гэхдээ чи түүнийг хэрэгцээтэй гэдгийг мэдсэн хэвээр.","Эд зүйлд найдсан зүрх нь өгөхөөс айдаг.","Матт 6:19–21; 1 Иохан 3:17",[-6,-6,-6]],
+[0,5,2,"Нууцаар тусалж, хэн өгснийг хэнд ч хэлэхгүй.","Одоохондоо: хэн ч мэдэхгүй, талархал авахгүй.","Хөрш чинь хэн тусалснаа мэдсэнгүй. Чи дотроо өвөрмөц тайван байдалтай.","Нууцад өгсөн нь Эцэгийн нүдэнд үнэтэй.","Матт 6:3–4; Галат 6:9–10",[9,6,8]]],
+disc:["Тусалснаа хүнд хэлэх нь хэзээ буруу болдог вэ?","Нууцаар өгөх нь яагаад зүрхэнд эрх чөлөө өгдөг вэ?"],
+teach:"Матт 6:1–4: үйлдэл биш, хариу хүлээдэг зүрх асуудалтай. Сурагч шалтгаанаа “хүмүүс харахын тулд” гэж сонгосон бол ичээхгүйгээр зүрхний асуулт болгон ярилц."},
+
+{id:7,ch:"Матт 6:25–34",title:"Шалгалтын өмнөх шөнө",quick:1,
+story:"Маргааш том шалгалт. Чи хангалттай бэлдээгүй, айдас хүчтэй. Нэг найз хариултын хуулбар санал болгов: “Хэн ч мэдэхгүй.”",
+c:[
+[1,1,5,"Хуулбарыг авч, дүнгээ найдвартай болгох.","Одоохондоо: айдас алга болно.","Дүн сайн гарсан ч тэр чинь чиний дүн биш. Дараагийн шалгалт бүр улам айлгана.","Дүнд найдсан зүрх хэзээ ч тайван бус.","Матт 6:24; Сургаал үгс 10:9",[-8,-4,-8]],
+[1,1,3,"Шөнийн гуравт хүртэл санаа зовж, хуваарь дахин дахин өөрчилж, унтахгүй байх.","Одоохондоо: “Би ямар нэг юм хийж байна” мэт.","Айдас хүчтэй болж, хэрэгтэй зүйл рүү тархи ажиллаагүй. Өглөө ядарсан байв.","Санаа зовох нь нэг цагийг ч нэмэхгүй.","Матт 6:27, 6:34",[-6,-2,-8]],
+[0,6,2,"Боломжит хугацаандаа үр бүтээлтэй бэлдээд, үлдсэнийг Шүтээнд даатгаж унтах.","Одоохондоо: бүрэн бэлэн биш мэт санагдана.","Унтсан чиний тархи өглөө илүү сайн ажиллав. Үр дүн төгс биш ч чи тайван байв.","Үүргээ хийж, үр дүнг даатгах нь итгэл.","Матт 6:33–34; Филиппой 4:6–7",[9,4,9]],
+[0,7,2,"Багшид хэцүү байгаагаа нээлттэй хэлж, нэмэлт хугацаа эсвэл тусламж гуйх.","Одоохондоо: ичгэвтэр, “сул” харагдах айдас.","Багш чамд дахин бэлдэх нэг өдөр өглөө. Хэлж чадсан нь чамд тайван өгөв.","Даруу байдал тусламж хүлээж авахаас эхэлдэг.","Матт 5:3; Иаков 4:6",[8,6,8]]],
+disc:["Санаа зовох ба бэлдэх хоёрын ялгаа юу вэ?","Хариулт хуулах нь Шүтээнд даатгахаас яагаад өөр вэ?"],
+teach:"Матт 6:33–34: үүргээ хийж, үр дүнг даатгах. Итгэл идэвхгүй байдал биш гэдгийг онцол."},
+
+{id:8,ch:"Матт 6:9–15",title:"Залбирал дахь нэр",
+story:"Орой залбирахдаа “бидний өрийг уучлан…” гэсэн мөрт хүрэхэд чамайг гүн гомдоосон хүн нүдэнд чинь буув.",
+c:[
+[1,2,4,"Залбирлаа хурдан дуусгаж, түүнийг алгасах.","Одоохондоо: эвгүй мэдрэмж алга.","Алгасах нь гомдлыг арилгасангүй. Тэр хүний нэр маргааш чамд дахин санагдав.","Тэнд тавьсан гомдол нууцаар хуримтлагдана.","Матт 6:14–15",[-6,-6,-8]],
+[1,8,4,"“Тэр уучлал гуйсан бол л би уучилна” гэж нөхцөл тавих.","Одоохондоо: “Би шударга” гэсэн мэдрэмж.","Нөхцөл тавьсан чинь тэр хүний гарт чиний амар амгаланг өгчихлөө. Тэр хэзээ ч гуйхгүй бол чи гацсан хэвээр.","Нөхцөлтэй уучлал бол үнэндээ уучлал биш.","Матт 6:12, 6:14–15",[-5,-6,-6]],
+[0,0,2,"Түүнийг нэрээр нь уучлахаар шийдэж, ерөөл гуйж, маргааш нэг жижиг эвлэрлийн алхам сонгох.","Одоохондоо: гомдол арилаагүй мэт, тэмцэл байна.","Мэдрэмж шууд өөрчлөгдөөгүй ч чи шийдвэр гаргав. Нэг долоо хоногийн дараа тэр хүнтэй мэндлэх нь хөнгөн болж байв.","Уучлал нь эхлээд шийдвэр, дараа нь мэдрэмж.","Матт 6:12, 6:14–15; Колоссай 3:13",[9,8,9]]],
+disc:["“Тэр эхлээд уучлал гуйг” гэдэг нөхцөл яагаад амархан санагддаг вэ?","Уучлал нь мэдрэмж үү, шийдвэр үү?"],
+teach:"Матт 6:14–15. Уучлал нь буруу үйлийг зөвтгөдөггүй, өшөөг Шүтээнд даатгадаг. Гүн гомдолтой сурагчийг “уучил” гэж шахахгүй."},
+
+{id:9,ch:"Галат 5:21; Матт 6:19–24",title:"Дахиад нэг тоглолт",
+story:"Шөнийн нэг цаг. Тоглоом, видео, чат: “Дахиад нэг л тоглолт”. Маргааш эрт босох хэрэгтэй.",
+c:[
+[1,7,5,"Үүр цайтал үргэлжлүүлж, “Би амарч байна” гэж өөрийгөө итгүүлэх.","Одоохондоо: таатай, ялалт, дараагийн шагнал.","Өглөө чинь дуусгавар. Хичээлд сэтгэл байхгүй. Хүсэл чамайг удирдаж байсныг ойлгов.","Хүсэл эзэн болох үед чөлөөт сонголт алдагддаг.","Галат 5:21; 1 Кор 6:12",[-8,-4,-8]],
+[1,8,4,"“Би залуу, ганцхан удаа” гэж зөвтгөж, цагаа үргэлжлүүлэх.","Одоохондоо: гэмших хэрэггүй мэт.","Зөвтгөх үг чинь хэр амархан гарахыг анзаарав. Маргааш ч бас адил байх болно.","Зөвтгөл нь зуршлыг хамгаалдаг.","Матт 6:21; Галат 5:21",[-6,-4,-7]],
+[0,8,2,"Цагийн хязгаарыг өөрөө тавьж цагтаа зогсоод, утсаа өрөөнөөс гаргаж унтах.","Одоохондоо: цэвэр “уйдсан” мэдрэмж, хоцрох айдас.","Эхний шөнө хэцүү байв. Гурав дахь шөнөөс сэтгэл чинь хөнгөрч эхэлсэн.","Биеэ захирах нь хүсэл дарах биш, чөлөөтэй сонгох чадвар.","Галат 5:23; 1 Кор 9:25–27",[9,5,9]]],
+disc:["Хоол, утас, тоглоом хэзээ зугаа байхаа болиод эзэн болдог вэ?","Биеэ захирах нь хүсэл дарах уу, зөв хүсэл хөгжүүлэх үү?"],
+teach:"Галат 5:21, 5:23; 1 Кор 6:12 “Би юунд ч захирагдахгүй”. Хатуу дүрмээс илүү бодит хил, орчны өөрчлөлт ашигтай."},
+
+{id:10,ch:"Матт 7:1–5",title:"Дүнз ба үртэс",quick:1,
+story:"Багш чиний ажлын мэдэгдэхүйц алдааг ангийн өмнө заав. Чи ичиж, халуу оров.",
+c:[
+[1,8,4,"“Тэр ч бас алдсан!” гэж хариулж, өөрийгөө урт тайлбараар зөвтгөх.","Одоохондоо: нэр төрөө хамгаалсан мэт.","Багш “Би чамд тусалъя гэж байна” гэж хэлсэн ч чи сонссонгүй. Алдаа засагдсангүй.","Засалтыг татгалзвал өсөлт зогсоно.","Матт 7:3–5; Сургаал үгс 12:1",[-6,-5,-6]],
+[1,6,4,"Завсарлагаанаар найзуудтайгаа багшийг муулж, талаа нэгтгэх.","Одоохондоо: дэмжлэг, халуун дулаахан.","Найзууд чинь хүлээн авав. Гэхдээ чамд алдаагаа хэзээ ч засах боломж олдоогүй.","Дүнзээ харахгүйгээр үртсийг олох нь амар.","Матт 7:1–3; Галат 5:20",[-6,-6,-5]],
+[0,7,2,"Шууд хариулахгүй сонсож, “Зөв, би үүнийг засъя” гэж хүлээж аваад, дараа нь асуулт тодруулах.","Одоохондоо: ичгэвтэр, бусдын өмнө.","Багш чамайг зөөлнөөр үргэлжлүүлж заав. Дараагийн ажил чинь мэдэгдэхүйц сайжирлаа.","Номхон хүн хэмжээгээр өсдөг.","Матт 7:3–5; Сургаал үгс 12:1",[9,7,8]]],
+disc:["Засалтыг сонсоход хамгийн хэцүү нь юу вэ?","Дүнз ба үртсийн зураг чамд хэнийг санагдуулдаг вэ?"],
+teach:"Матт 7:1–5. Хайр бүхий засалт ба шүүлтийг ялга. Сурагчдад засалт хүлээн авах мөн өөрөө засалт хэлэх дадлыг зааж өг."},
+
+{id:11,ch:"Матт 7:12",title:"Шинэ сурагч",
+story:"Шинэ сурагч анги дундаа ганцаараа суух бөгөөд найзууд чинь түүнийг тоолгүй хөгжөөнт ярьж байна. Түүнтэй яриа эхлэх боломж чамд бий.",
+c:[
+[1,6,4,"Найзуудаасаа хөндийрөхгүйн тулд “Тэд бидэнтэй адил биш” гэж үл тоох.","Одоохондоо: найзуудын дунд тав тухтай.","Шинэ сурагч хэн нэгэнд хэрэгтэй биш гэдгээ мэдэрч, нэг сарын дараа сургуулиас өөр сургуульд шилжив.","Бид ба тэд гэсэн зураас өөрийн нүдэнд ч нэмэгддэг.","Матт 7:12; Галат 5:20",[-7,-8,-6]],
+[1,1,3,"Түүнтэй зөвхөн дүн сайн гэдгийг мэдсэн үедээ ойртох.","Одоохондоо: хэрэгтэй ашигтай танил.","Тэр чамайг ашиглаж байгааг мэдэв. Нөхөрлөл байхгүй, зөвхөн хэрэгцээ.","Хүнийг ашигт тохируулан хэмжих нь харилцааг дотроос нь ялзаруулна.","Матт 6:24; Матт 7:12",[-6,-7,-5]],
+[0,5,3,"Хажууд нь суугаад өөрийгөө танилцуулж, өдрийн хоолонд урих.","Одоохондоо: найзууд “Яагаав?” гэж гайхна.","Тэр хүн эхэндээ чимээгүй байсан ч хоолны завсар инээмсэглэв. Чиний найзуудын нэг нь ч нэгдэв.","Өөрт хийлгэхийг хүсэх зүйлээ бусдад хийх нь Хуулийн хураангуй.","Матт 7:12; Галат 5:13–14",[8,9,8]]],
+disc:["Алтан дүрэм манай ангид хэзээ хамгийн хэцүү болдог вэ?","Хүнийг ашигтай гэж хэмжих нь харилцааг яаж өөрчилдөг вэ?"],
+teach:"Матт 7:12 нь Хууль ба Бошиглогчдын хураангуй. Нийгмийн дарамт, олны сонголт руу чиглүүл."},
+
+{id:12,ch:"Галат 5:26; 5:20–21",title:"Түрүүлсэн найз",
+story:"Хамт суудаг найз чинь олимпиадад түрүүлж, бүх сургууль түүнийг сайшааж байна. Чи ч бас хичээсэн.",
+c:[
+[1,4,3,"Өөрийгөө түүнтэй харьцуулж, “Би ямар ч дэмий” гэж дүгнэх.","Одоохондоо: хүлээлт буурч, бага өвдөнө.","Баяр хөөртэй өдөр чинь харанхуй болов. Найз чинь чиний хөндий байдлыг анзаарлаа.","Харьцуулал баяр хөөрийг хулгайлдаг.","Галат 5:26; 1 Кор 13:4",[-7,-6,-7]],
+[1,4,4,"Нууцаар: “Тэр заль хийсэн байх” гэж ярих.","Одоохондоо: өөрийгөө өндөр мэт санагдана.","Хэдэн хүн чамтай санал нийлэв. Дараа нь үнэн нь мэдэгдэж, чиний нэр шархалсан.","Атаархал хэлж гүтгэх хүртэл өссөн үед хэцүү.","Галат 5:20–21; Сургаал үгс 14:30",[-8,-8,-7]],
+[0,1,2,"Түүнд чин сэтгэлээсээ баяр хүргэж, түүний хичээсэн зүйлийг нэрлэн магтаад, өөрийн замаа үргэлжлүүлэх.","Одоохондоо: чинь хаа нэгтээ өвдөнө.","Баяр хүргэхэд чи өөрийн жинхэнэ хүсэл мөрөөдлөө олж харав. Найз чинь чамд баярлав.","Баяр хөөр нь харьцуулалтаас чөлөөлдөг.","Ром 12:15; Галат 5:26",[9,8,9]]],
+disc:["Харьцуулал хэзээ урам өгдөг, хэзээ хор болдог вэ?","Бусдын амжилтад бодитоор баярлахад юу саад болдог вэ?"],
+teach:"Галат 5:26. Баяр хөөр өвдөлтийг арилгадаггүй ч зүрхийг чөлөөлдөг. Өөрийн авьяасыг үнэлэхэд сурагчдад тусал."},
+
+{id:13,ch:"Матт 7:21–27",title:"Хад чулуун суурь",
+story:"Долоо хоног дуусаж байна. Та Матт 5–7-г сонслоо. Багш асууна: “Одоо яах вэ?”",
+c:[
+[1,8,4,"Мэдсэнээ бусдад заахдаа гайхуулж, өөрөө өөрчлөгдөхгүй.","Одоохондоо: мэдлэгийн нэр хүнд.","Хүмүүс чамайг мэддэг гэж үзэв. Гэхдээ чи өөрийнхөө зүрхэнд юу ч өөрчилсөнгүй.","Мэдэх ба хийх хоёрын зай бүрээсийг ухаж гаргана.","Матт 7:21–23; Иаков 1:22",[-6,-4,-6]],
+[1,7,5,"“Маргаашнаас эхэлье” гэж хойшлуулж, эхлэхгүй байх.","Одоохондоо: ачаа алга, эвтэйхэн.","Маргааш ирлээ, хойшлуулах шалтаг ч бас. Нэг сар ярилгүйгээр өнгөрлөө.","Хойшлуулалт өөрийн хүслийн ёсоор амьдрахын нэг хэлбэр.","Матт 7:26–27; Иаков 4:17",[-6,-3,-7]],
+[0,8,2,"Нэг тодорхой алхмыг сонгоод, өдөр бүр тэмдэглэж, нэг найзтайгаа хамт хариуцлагатай байх.","Одоохондоо: жижиг, “гайхалтай” биш мэт.","Долоо хоногийн дараа алхам чинь зуршил болж эхэлж байв. Найз чинь бас эхлэв.","Хад чулуун дээр суурь тавьсан байшин шуурганд тэсдэг.","Матт 7:24–27; Иаков 1:22",[9,7,9]],
+[0,6,2,"Шүтээнд дуулгавартай байхаа залбираад, эхний жижиг алхмыг яг одоо хийх.","Одоохондоо: хэзээ хүч гарахыг мэдэхгүй.","Чи хүч нэхэлгүй, зөвхөн эхний алхмыг хийв. Үлдсэн нь аажим аажмаар дагалаа.","Итгэл дуулгавартай үйлдлээр бүрэн болдог.","Иаков 2:22; Матт 7:24",[8,6,8]]],
+disc:["Мэдлэг ба дуулгавар хоёрын зай хаана байна?","Нэг долоо хоногт хийж чадах хамгийн жижиг алхам юу вэ?"],
+teach:"Матт 7:24–27: хад чулуун суурь бол сонссон үгээ хийх явдал. Сурагч бүр нэг алхам бичиж, хариуцлагатай хамтрагчтай болгоорой."}
+];
+S.forEach(s=>{s.c=s.c.map(a=>({x:a[0],k:a[1],st:a[2],t:a[3],g:a[4],fb:a[5],lt:a[6],v:a[7],d:a[8]}))});
+
+const $=s=>document.querySelector(s);
+const app=$("#app");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clamp=v=>Math.max(0,Math.min(100,v));
+const sgn=v=>(v>0?"+":"")+v;
+const shuf=n=>{const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const dots=n=>"●".repeat(n)+"○".repeat(5-n);
+const ltv=e=>e.d[0]+e.d[1]+e.d[2];
+
+let TEACHER=false, MODE="quick", NAME="";
+let G=null;
+
+function newGame(){
+  const scenes=S.filter(s=>MODE==="full"||s.quick);
+  G={scenes,i:0,heart:50,rel:50,peace:50,log:[],stage:"pick",sel:null,expl:"",motive:null,order:shuf(scenes[0].c.length),late:null,rtext:"",cur:null};
+}
+function sceneStart(){
+  G.stage="pick";G.sel=null;G.expl="";G.motive=null;G.rtext="";G.cur=null;G.order=shuf(G.scenes[G.i].c.length);
+}
+function applyD(d,m){G.heart=clamp(G.heart+d[0]);G.rel=clamp(G.rel+d[1]);G.peace=clamp(G.peace+d[2])}
+
+function headerHTML(){
+  const n=G.scenes.length, cur=Math.min(G.i+1,n);
+  return `<div class="hdr"><div class="hdr-in">
+  <div class="row sp"><span class="brand">Зүрхний зам</span>
+  <span class="row"><span class="small mute">${G.stage==="final"?"Дүн":"Нөхцөл "+cur+" / "+n}</span>
+  <button class="tog" id="tgT" aria-pressed="${TEACHER}">Багшийн горим</button></span></div>
+  <div><div class="bal" role="img" aria-label="Зүрхний байдал ${G.heart} / 100"><i style="left:${Math.max(3,Math.min(97,G.heart))}%"></i></div>
+  <div class="bal-l"><span>Махбодын зам</span><span>Сүнсний зам</span></div></div>
+  <div class="meters">${meter("Зүрх",G.heart)}${meter("Харилцаа",G.rel)}${meter("Дотоод амар тайван",G.peace)}</div>
+  </div></div>`;
+}
+function meter(l,v){return `<div class="m"><b><span>${l}</span><span>${v}</span></b><div class="t"><i style="width:${v}%"></i></div></div>`}
+
+function introHTML(){
+  return `<div class="card">
+  <span class="tag">Матт 5–7 · Галат 5 · сонголтоор тоглодог сэтгэл зүйн тоглоом</span>
+  <h1>Зүрхний зам</h1>
+  <p class="story">Нэг долоо хоногийн турш сурагчийн амьдралд тохиолдох нөхцөл бүрд нэг сонголт хий. Сонголт бүр чиний зүрхнээс юу илүү их гарч байгааг харуулна.</p>
+  <ol class="intro-list">
+    <li>Нөхцөл бүрээс нэг шийдвэр сонгоно.</li>
+    <li>Шийдвэрээ <b>өөрийн үгээр тайлбарлаж</b>, шалтгаанаа сонгоно.</li>
+    <li>Дараа нь үр дүн: <b>зөв байдал</b> эсвэл <b>махбодын зам</b>. Махбодын замд орвол <b>гэмшин эргэх</b> эсвэл <b>үргэлжлүүлэх</b> сонголттой.</li>
+    <li>Эргэх замыг дараа нь ч нээлттэй. Эцсийн дүнг хамгийн сүүлд харна.</li>
+  </ol>
+  <details><summary>Тоглоомын онол яагаад энд хамаатай вэ?</summary>
+  <p class="small" style="margin-top:8px">Шийдвэр бүр өгөөжтэй (payoff). Махбодын зам заримдаа богино хугацаанд илүү ашигтай мэт харагддаг. Зөв зам нь одоохондоо үнэтэй байж болно. Харин энэ нь давтагддаг тоглоом: өнөөдрийн сонголт маргаашийн итгэл, харилцаа, дотоод амар тайвныг тодорхойлно. Сонголт бүрд “одоохондоо” ба “урт хугацаанд” гэсэн хоёр өгөөжийг харьцуул.</p></details>
+  <div class="field"><label for="nm">Нэр (заавал биш)</label><input type="text" id="nm" value="${esc(NAME)}" autocomplete="off"></div>
+  <fieldset><legend>Тоглолтын хэмжээ</legend>
+  <div class="modes">
+   <button class="mode" data-mode="quick" aria-pressed="${MODE==="quick"}"><b>Түргэн · 6 нөхцөл</b><span class="small mute">Ойролцоогоор 15–20 минут. Нэг хичээлийн цаг.</span></button>
+   <button class="mode" data-mode="full" aria-pressed="${MODE==="full"}"><b>Бүрэн · 13 нөхцөл</b><span class="small mute">Ойролцоогоор 40 минут. Матт 5–7 бүгдийг хамарна.</span></button>
+  </div></fieldset>
+  <p class="small mute">Багшийн горимд сонголтын дараа үр дүн шууд нээгдэхгүй: эхлээд ангид ярилцах хэсэг гарна. Дээд талын товчоор хүссэн үедээ солино.</p>
+  <div class="row"><button class="btn" id="start">Тоглож эхлэх</button></div>
+  </div>`;
+}
+
+function lateBanner(){
+  const pend=G.log.filter(e=>e.status==="continued");
+  if(!pend.length||G.stage==="late")return "";
+  return `<div class="callout"><span class="tag">Үүрсэн ачаалал · ${pend.length}</span>
+  <p>Өмнөх шийдвэрүүд чинь зүрхэнд үлдсэн хэвээр байна. Эргэх хаалга нээлттэй (Сургаал үгс 28:13).</p>
+  <div class="row">${pend.map(e=>`<button class="btn ghost" data-late="${G.log.indexOf(e)}">Эргэх: ${esc(e.title)}</button>`).join("")}</div></div>`;
+}
+
+function sceneHTML(){
+  const sc=G.scenes[G.i];
+  let h=`<div class="card"><span class="tag">${esc(sc.ch)}</span><h2>${esc(sc.title)}</h2><p class="story">${esc(sc.story)}</p></div>`;
+  h+=lateBanner();
+  if(G.stage==="pick"){
+    h+=`<div class="card"><h3>Чи юу хийх вэ?</h3><div class="opts">`+
+    G.order.map((ci,pos)=>{const c=sc.c[ci];return `<button class="opt" data-ci="${ci}" aria-pressed="${G.sel===ci}"><span class="l">${LET[pos]}</span><span>${esc(c.t)}<span class="g"><b>Одоохондоо</b> ${esc(c.g.replace(/^Одоохондоо:\s*/,""))}</span></span></button>`}).join("")+`</div></div>`;
+    if(G.sel!==null){
+      h+=`<div class="card"><div class="field"><label for="expl">Яагаад энэ шийдвэрийг гаргав? Өөрийн үгээр бич.</label>
+      <textarea id="expl" placeholder="Би ингэж бодсон учир нь…">${esc(G.expl)}</textarea><span class="need" id="needE"></span></div>
+      <fieldset><legend>Миний гол шалтгаан</legend>${MOT.map((m,i)=>`<label class="radio"><input type="radio" name="mot" value="${i}" ${G.motive===i?"checked":""}><span style="font-weight:400">${esc(m)}</span></label>`).join("")}</fieldset>
+      <div class="row"><button class="btn" id="conf" disabled>Шийдвэрээ батлах</button></div></div>`;
+    }
+  }
+  if(G.stage==="gate"){
+    const e=G.cur;
+    h+=`<div class="card"><span class="tag">Ангид ярилц</span><h3>Үр дүнг нээхээс өмнө</h3>
+    <div class="quote"><span class="tag">Сурагчийн сонголт</span>${esc(e.text)}</div>
+    <div class="quote"><span class="tag">Сурагчийн тайлбар · шалтгаан: ${esc(MOTS[e.motive])}</span>${esc(e.expl)}</div>
+    <details open><summary>Ярилцлагын асуулт</summary><ul>${sc.disc.map(q=>`<li>${esc(q)}</li>`).join("")}<li>Анги: та өөр ямар сонголт хийх байсан бэ? Яагаад?</li></ul>
+    <div class="teach"><b>Багшид.</b> ${esc(sc.teach)}</div></details>
+    <div class="row"><button class="btn" id="reveal">Үр дүнг нээх</button></div></div>`;
+  }
+  if(G.stage==="result"||G.stage==="repent")h+=resultHTML(sc);
+  if(G.stage==="late")h+=lateFormHTML();
+  return h;
+}
+
+function resultHTML(sc){
+  const e=G.cur, flesh=e.x===1;
+  const ch=sc.c.find(c=>c.t===e.text);
+  let h=`<div class="card"><div class="verdict ${flesh?"flesh":"fruit"}">
+   <span class="tag">${flesh?"Махбодын зам · Галат 5:19–21":"Зөв байдлын зам · Галат 5:22–23"}</span>
+   <span class="big">${flesh?esc(FL[e.k]):"Сүнсний жимс: "+esc(FR[e.k])}</span></div>
+   <div class="quote"><span class="tag">Чиний сонголт</span>${esc(e.text)}</div>
+   <div class="quote"><span class="tag">Чиний тайлбар</span>${esc(e.expl)}</div>
+   <div><h3>Юу болов</h3><p>${esc(ch.fb)}</p></div>
+   <div><h3>Урт хугацаанд</h3><p>${esc(ch.lt)}</p></div>
+   <div class="pay"><div><span class="mute">Одоохондоо ашиг</span><b>${dots(e.st)}</b></div><div><span class="mute">Урт хугацааны өгөөж</span><b>${sgn(ltv(e))}</b></div></div>
+   <div class="chips">${["Зүрх","Харилцаа","Дотоод амар"].map((n,i)=>`<span class="chip ${e.d[i]>0?"up":"dn"}">${n} ${sgn(e.d[i])}</span>`).join("")}</div>
+   ${e.note?`<p class="small"><b>Зүрхний шалгалт.</b> ${esc(e.note)}</p>`:""}
+   <p class="small mute">📖 ${esc(ch.v)}</p>`;
+  if(G.stage==="repent"){
+    h+=`<div class="callout"><span class="tag">Гэмшин эргэх</span><label for="rt">Би юуг хүлээн зөвшөөрч, хэнд, яаж засах вэ? Өөрийн үгээр бич.</label>
+    <textarea id="rt" placeholder="Би буруу зүйл хийсэн. Би…">${esc(G.rtext)}</textarea><span class="need" id="needR"></span>
+    <div class="row"><button class="btn fruit" id="doRep" disabled>Эргэж зөв замд орох</button><button class="btn ghost" id="cancelRep">Буцах</button></div></div>`;
+  } else if(flesh&&e.status==="pending"){
+    h+=`<div class="callout"><span class="tag">Хоёр зам</span><p>Энэ нь махбодын замд орсон сонголт байлаа. Одоо чи юу хийх вэ?</p>
+    <div class="row"><button class="btn fruit" id="repent">Гэмшин эргэх</button><button class="btn flesh" id="cont">Үргэлжлүүлэх</button></div>
+    <p class="small mute">Үргэлжлүүлбэл үр дагавар ачаалал болж үлдэнэ. Дараа нь ч эргэж болно.</p></div>`;
+  } else {
+    if(e.status==="repented")h+=graceHTML();
+    if(e.status==="continued")h+=`<div class="callout"><span class="tag">Үргэлжилсэн</span><p>Чи энэ сонголтоо үргэлжлүүлэхээр шийдлээ. Ачаалал үлдэнэ. Эргэх хаалга хаагдаагүй: ямар ч үед нээгдэнэ.</p></div>`;
+    const last=G.i===G.scenes.length-1;
+    h+=`<div class="row"><button class="btn" id="next">${last?"Эцсийн дүнг харах":"Дараагийн нөхцөл"}</button></div>`;
+  }
+  h+=`<details ${TEACHER?"open":""}><summary>Ангийн ярилцлага</summary><ul>${sc.disc.map(q=>`<li>${esc(q)}</li>`).join("")}</ul>${TEACHER?`<div class="teach"><b>Багшид.</b> ${esc(sc.teach)}</div>`:""}</details></div>`;
+  return h;
+}
+function graceHTML(){return `<div class="grace"><b>Эргэлт бол ялагдал биш.</b> “Хэрэв бид нүглээ наминчилбал Тэр итгэмжит бөгөөд зөв байдалтай тул нүглийг уучилна” (1 Иохан 1:9). Сургаал үгс 28:13. Лук 15:20: эцэг хол байхаас нь харж, гүйн очив.</div>`}
+function lateFormHTML(){
+  const e=G.log[G.late];
+  return `<div class="card"><span class="tag">Эргэх · ${esc(e.title)}</span>
+  <div class="quote"><span class="tag">Тэр үеийн сонголт</span>${esc(e.text)}</div>
+  <label for="rt">Би юуг хүлээн зөвшөөрч, хэнд, яаж засах вэ?</label>
+  <textarea id="rt" placeholder="Би буруу зүйл хийсэн. Би…">${esc(G.rtext)}</textarea><span class="need" id="needR"></span>
+  <div class="row"><button class="btn fruit" id="doLate" disabled>Эргэж зөв замд орох</button><button class="btn ghost" id="cancelLate">Буцах</button></div></div>`;
+}
+
+/* final */
+function finalHTML(){
+  const L=G.log;
+  const fruit=Array(9).fill(0), flesh=Array(9).fill(0);
+  L.forEach(e=>{if(e.x)flesh[e.k]++;else fruit[e.k]++});
+  const nF=L.filter(e=>!e.x).length, nX=L.filter(e=>e.x).length;
+  const rep=L.filter(e=>e.status==="repented"||e.status==="late").length;
+  const pend=L.filter(e=>e.status==="continued");
+  const bait=L.filter(e=>e.st>=4&&ltv(e)<0).length;
+  let title,txt;
+  if(G.heart>=75){title="Сүнсээр алхаж буй зүрх";txt="Чиний сонголтууд Сүнсний жимсийг гаргаж байна. Үүнийг өөрийн хүчээр биш, харин өдөр бүр сонгож буй дуулгавараар хадгалдаг гэдгийг санаарай."}
+  else if(G.heart>=55){title="Өсөж буй зүрх";txt="Сүнсний жимс ба махбодын хүсэл хоёрын хоорондох тэмцэл тодорхой харагдаж байна. Хэд хэдэн нөхцөлд чи зөв замыг сонгож чадсан."}
+  else if(G.heart>=35){title="Тэмцэж буй зүрх";txt="Чиний зүрхэнд хоёр хүч тэмцэж байна (Галат 5:17). Энэ бол ялагдал биш: чамд хаана өсөх хэрэгтэйг мэдэж авах боломж бий."}
+  else{title="Эргэлт хэрэгтэй зүрх";txt="Махбодын зам олон сонголтод давамгайлав. Гэхдээ эргэх хаалга нээлттэй. Нэг жижиг шийдвэрээр эхэл."}
+  const fb=(arr,names,cls)=>names.map((n,i)=>`<div class="bar ${cls}"><span>${n}</span><span class="t"><i style="width:${Math.min(100,arr[i]*50)}%"></i></span><span>${arr[i]}</span></div>`).join("");
+  const pc=L.map((e,i)=>{const v=ltv(e);const w=Math.round(Math.abs(v)/27*100);return `<div class="pr"><span class="mute">${i+1}</span><span class="bb"><i class="s" style="width:${e.st*20}%"></i><i class="${v>=0?"lp":"ln"}" style="width:${Math.max(4,w)}%"></i></span></div>`}).join("");
+  const pendH=pend.length?`<div class="callout"><span class="tag">Эцсийн өмнө эргэх боломж</span><p>Үргэлжлүүлсэн ${pend.length} шийдвэр үлджээ. Хүсвэл одоо эргэж болно.</p><div class="row">${pend.map(e=>`<button class="btn ghost" data-late="${L.indexOf(e)}">Эргэх: ${esc(e.title)}</button>`).join("")}</div></div>`:"";
+  const jr=L.map((e,i)=>`<div class="jr"><div><b>${i+1}. ${esc(e.title)}</b> <span class="mute small">${esc(e.ch)}</span></div>
+  <div><span class="pill ${e.x?"x":"f"}">${e.x?esc(FL[e.k]):esc(FR[e.k])}</span>${e.status==="repented"||e.status==="late"?'<span class="pill g">Эргэсэн</span>':""}${e.status==="continued"?'<span class="pill x">Үргэлжилсэн</span>':""}<span class="pill g">${esc(MOTS[e.motive])}</span></div>
+  <div>${esc(e.text)}</div><div class="mute">“${esc(e.expl)}”</div>${e.rtext?`<div class="mute">Эргэлт: “${esc(e.rtext)}”</div>`:""}</div>`).join("");
+  const qs=["Аль сонголт хамгийн хэцүү байсан бэ? Яагаад?","Аль сонголтод ашигтай харагдсан замыг сонгосон бэ? Урт хугацаанд юу болсон?","Эргэх үед чи юу мэдэрсэн бэ? Эргэх нь яагаад хэцүү вэ?","Зөв үйлдлийг буруу шалтгаанаар хийж байсан тохиолдол байна уу? (Матт 6:1)","Галат 5:16 “Сүнсээр алх”: өдөр тутамд хэрхэн сонгох вэ?"];
+  return `<div class="card"><span class="tag">${NAME?esc(NAME)+" · ":""}Эцсийн дүн</span><h1>${title}</h1><p class="story">${txt}</p>
+  <div class="pay"><div><span class="mute">Зөв байдлын сонголт</span><b>${nF} / ${L.length}</b></div><div><span class="mute">Махбодын замын сонголт</span><b>${nX} / ${L.length}</b></div><div><span class="mute">Гэмшин эргэсэн</span><b>${rep}</b></div><div><span class="mute">Үргэлжилсэн ачаалал</span><b>${pend.length}</b></div></div>
+  <div class="chips"><span class="chip">Зүрх ${G.heart}</span><span class="chip">Харилцаа ${G.rel}</span><span class="chip">Дотоод амар ${G.peace}</span></div></div>
+  ${pendH}
+  <div class="card"><h2>Сонгосон замын зураг</h2><div class="cols"><div><h3>Сүнсний жимс</h3><div class="bars" style="margin-top:10px">${fb(fruit,FR,"f")}</div></div><div><h3>Махбодын хэв маяг</h3><div class="bars" style="margin-top:10px">${fb(flesh,FL,"x")}</div></div></div>
+  <p class="small mute">Тоо нь тэр хэв маягийг хэдэн удаа сонгосныг харуулна. Гэмшин эргэсэн сонголтууд мөн тоологдоно.</p></div>
+  <div class="card"><h2>Богино хугацааны ашиг ба урт хугацааны өгөөж</h2>
+  <div class="legend"><span><i style="background:var(--gold)"></i>Одоохондоо ашиг</span><span><i style="background:var(--fruit)"></i>Урт хугацаанд эерэг</span><span><i style="background:var(--flesh)"></i>Урт хугацаанд сөрөг</span></div>
+  <div class="pcht">${pc}</div>
+  <p>${bait>0?`${bait} нөхцөлд “одоохондоо ашигтай” (4–5) харагдсан сонголт урт хугацаанд сөрөг болов.`:"Чи богино хугацааны ашигт уруу татагдсангүй."} Давтагддаг тоглоомд итгэл, харилцаа, амар тайван хуримтлагддаг.</p></div>
+  <div class="card"><h2>Миний шийдвэрийн тэмдэглэл</h2>${jr}
+  <div class="row"><button class="btn ghost" id="copyJ">Тэмдэглэлийг хуулах</button></div><div id="cpBox"></div></div>
+  <div class="card"><h2>Ангид ярилцах асуулт</h2><ol class="intro-list">${qs.map(q=>`<li>${esc(q)}</li>`).join("")}</ol>
+  <p><b>Энэ долоо хоногийн нэг алхам:</b> ______________________________________</p>
+  <p class="small mute">Тунгаах хэсэг: Матт 5–7; Галат 5. Энэ тоглоом хэн ч хэнийг шүүхгүй. Оноо нь авралын хэмжүүр биш, оношилгоо ч биш.</p>
+  <div class="row"><button class="btn" id="again">Дахин тоглох</button></div></div>`;
+}
+function journalText(){
+  return (NAME?NAME+" — ":"")+"Зүрхний зам: шийдвэрийн тэмдэглэл\n\n"+G.log.map((e,i)=>`${i+1}. ${e.title} (${e.ch})\n   Сонголт: ${e.text}\n   Төрөл: ${e.x?FL[e.k]:FR[e.k]}${e.status==="continued"?" · үргэлжилсэн":""}${e.status==="repented"||e.status==="late"?" · эргэсэн":""}\n   Шалтгаан: ${MOTS[e.motive]}\n   Тайлбар: ${e.expl}${e.rtext?"\n   Эргэлт: "+e.rtext:""}`).join("\n\n");
+}
+
+/* render + events */
+function render(){
+  if(!G){app.innerHTML=introHTML();return}
+  app.innerHTML=headerHTML()+(G.stage==="final"?finalHTML():sceneHTML());
+  syncForm();
+}
+function syncForm(){
+  const e1=$("#expl"),c=$("#conf");
+  if(e1&&c){const ok=G.expl.trim().length>=12&&G.motive!==null;c.disabled=!ok;
+    $("#needE").textContent=G.expl.trim().length<12?"Дор хаяж 12 тэмдэгт бич ("+G.expl.trim().length+"/12)":(G.motive===null?"Гол шалтгаанаа сонго.":"")}
+  const r=$("#rt"),d=$("#doRep")||$("#doLate");
+  if(r&&d){const ok=r.value.trim().length>=12;d.disabled=!ok;$("#needR").textContent=ok?"":"Дор хаяж 12 тэмдэгт бич ("+r.value.trim().length+"/12)"}
+}
+function repentApply(e,late){
+  const d=e.d;
+  applyD([Math.round(-d[0]*0.6)+3,Math.round(-d[1]*0.6),Math.round(-d[2]*0.6)+2],0);
+  if(late)applyD([0,0,3],0);
+}
+app.addEventListener("click",ev=>{
+  const t=ev.target.closest("button");if(!t)return;
+  if(t.id==="tgT"){TEACHER=!TEACHER;render();return}
+  if(t.dataset.mode){MODE=t.dataset.mode;render();return}
+  if(t.id==="start"){const n=$("#nm");NAME=n?n.value.trim():"";newGame();render();window.scrollTo(0,0);return}
+  if(!G)return;
+  if(t.dataset.ci!==undefined){G.sel=+t.dataset.ci;render();const x=$("#expl");if(x)x.scrollIntoView({block:"center",behavior:"smooth"});return}
+  if(t.id==="conf"){
+    const sc=G.scenes[G.i],ch=sc.c[G.sel];let d=ch.d.slice(),note="";
+    if(!ch.x){ if(G.motive!==0){d=d.map(v=>Math.round(v/2));
+        note=G.motive===2?"Зөв үйлдэл боловч айдсаар хийсэн. Айдас эрх чөлөөг өгдөггүй (Галат 5:1; 1 Иохан 4:18). Өгөөж хагасаар буурав.":"Үйлдэл зөв ч шалтгаан нь хүмүүст харагдах эсвэл өөрийн ашиг байв. Эцэг нууцад үздэг (Матт 6:1–4). Өгөөж хагасаар буурав."}}
+    else if(G.motive===0){note="Зөв гэж үзсэн ч үр жимс нь зүрхийг харуулна (Матт 7:16; Сургаал үгс 14:12)."}
+    applyD(d);
+    const e={sid:sc.id,title:sc.title,ch:sc.ch,x:ch.x,k:ch.k,text:ch.t,st:ch.st,expl:G.expl.trim(),motive:G.motive,d,note,status:ch.x?"pending":"ok",rtext:""};
+    G.log.push(e);G.cur=e;G.stage=TEACHER?"gate":"result";render();window.scrollTo(0,0);return}
+  if(t.id==="reveal"){G.stage="result";render();window.scrollTo(0,0);return}
+  if(t.id==="repent"){G.stage="repent";G.rtext="";render();const x=$("#rt");if(x)x.focus();return}
+  if(t.id==="cancelRep"){G.stage="result";render();return}
+  if(t.id==="doRep"){const e=G.cur;e.rtext=$("#rt").value.trim();e.status="repented";repentApply(e,0);G.stage="result";render();return}
+  if(t.id==="cont"){const e=G.cur;e.status="continued";applyD([-2,0,-3]);G.stage="result";render();return}
+  if(t.id==="next"){if(G.i===G.scenes.length-1){G.stage="final"}else{G.i++;sceneStart()}render();window.scrollTo(0,0);return}
+  if(t.dataset.late!==undefined){G.prev=G.stage;G.late=+t.dataset.late;G.stage="late";G.rtext="";render();window.scrollTo(0,0);return}
+  if(t.id==="cancelLate"){G.stage=G.i>=G.scenes.length-1&&G.prev==="final"?"final":(G.prev||"pick");if(G.stage==="pick"&&G.sel!==null)G.sel=null;render();return}
+  if(t.id==="doLate"){const e=G.log[G.late];e.rtext=$("#rt").value.trim();e.status="late";repentApply(e,1);G.stage=G.prev||"pick";render();window.scrollTo(0,0);return}
+  if(t.id==="again"){G=null;render();window.scrollTo(0,0);return}
+  if(t.id==="copyJ"){
+    const txt=journalText(),box=$("#cpBox");
+    const fb=()=>{box.innerHTML='<textarea id="cpT" readonly style="margin-top:10px;min-height:160px"></textarea>';const a=$("#cpT");a.value=txt;a.focus();a.select()};
+    try{navigator.clipboard.writeText(txt).then(()=>{box.innerHTML='<p class="small mute" style="margin-top:8px">Хуулагдлаа.</p>'},fb)}catch(_){fb()}
+    return}
+});
+app.addEventListener("input",ev=>{
+  if(!G)return;
+  if(ev.target.id==="expl"){G.expl=ev.target.value;syncForm()}
+  if(ev.target.id==="rt"){G.rtext=ev.target.value;syncForm()}
+  if(ev.target.name==="mot"){G.motive=+ev.target.value;syncForm()}
+});
+render();
+</script>
+
+</body></html>
